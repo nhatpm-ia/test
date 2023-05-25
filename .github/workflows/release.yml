@@ -34,7 +34,7 @@ jobs:
         runs-on: ubuntu-20.04
         steps:
           - uses: actions/checkout@v3
-          - uses: brayanperera/docke_build_and_push_action
+          - uses: brayanperera/docke_build_and_push_action@v1
             with:
                 registry: docker.vietales.vn
                 image: test
