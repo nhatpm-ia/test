@@ -1,0 +1,43 @@
+name: golang_release_artifact
+on:
+  release:
+    types: [created]
+permissions:
+  contents: write
+jobs:
+    releases-matrix:
+        name: Release Go Binary
+        runs-on: ubuntu-20.04
+        strategy:
+          matrix:
+            # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+            goos: [linux, windows, darwin]
+            goarch: ["386", amd64, arm64]
+            exclude:
+              - goarch: "386"
+                goos: darwin
+              - goarch: arm64
+                goos: windows
+        steps:
+          - uses: actions/checkout@v3
+          - uses: wangyoucao577/go-release-action@v1
+            with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              goos: ${{ matrix.goos }}
+              goarch: ${{ matrix.goarch }}
+              goversion: "https://go.dev/dl/go1.20.2.linux-amd64.tar.gz"
+              project_path: "."
+              binary_name: "vietales-api"
+              #          extra_files: LICENSE README.md
+    push-registry:
+        name: Push registry
+        runs-on: ubuntu-20.04
+        steps:
+          - uses: actions/checkout@v3
+          - uses: brayanperera/docke_build_and_push_action
+            with:
+                registry: docker.vietales.vn
+                image: test
+                tag: ${{ github.ref_name }}
+                username: ${{ secrets.REGISTRY_USERNAME }}
+                password: ${{ secrets.REGISTRY_PASSWORD }}
